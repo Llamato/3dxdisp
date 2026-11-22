@@ -127,14 +127,17 @@
             }
           ) { };
 
-          default = pkgs.symlinkJoin {
-            name = "3dxdisp";
-            paths = [
-              self.packages.${system}.driver
-              self.packages.${system}.example
-              self.packages.${system}.spacepilotDisplay
-            ];
-          };
+          default = pkgs.lib.makeOverridable (
+            { jamlytics ? false }:
+            pkgs.symlinkJoin {
+              name = "3dxdisp";
+              paths = [
+                self.packages.${system}.driver
+                self.packages.${system}.example
+                (self.packages.${system}.spacepilotDisplay.override { inherit jamlytics; })
+              ];
+            }
+          ) {};
         };
         apps = {
           example = {
