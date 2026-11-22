@@ -22,6 +22,7 @@
       system:
       let
         pkgs = import nixpkgs { inherit system; };
+        lib = pkgs.lib;
         relativePathSubstitution = ''
           substituteInPlace Makefile \
             --replace-fail "../lib3dxdisp.a" "${self.packages.${system}.driver}/lib/lib3dxdisp.a"
@@ -103,31 +104,54 @@
             '';
           };
 
-          spacepilotDisplay = pkgs.stdenv.mkDerivation {
-            pname = "spacepilotdisplay";
-            version = "1.0.0";
-            src = ./spacepilotdisplay;
+          spacepilotDisplay = lib.makeOverridable (
+            {
+              jamlytics ? false,
+            }:
+            pkgs.stdenv.mkDerivation {
+              pname = "spacepilotdisplay";
+              version = "1.0.0";
+              src = ./spacepilotdisplay;
 
-            makeFlags = [
-              "PREFIX=$(out)"
-              "DESTDIR="
-            ];
+              makeFlags = [
+                "PREFIX=$(out)"
+                "INSTALL_ASSETS=${if jamlytics then "1" else "0"}"
+              ];
 
-            buildInputs = [
-              self.packages.${system}.driver
-              pkgs.udev.dev
-            ];
+              buildInputs = [
+                self.packages.${system}.driver
+                pkgs.udev.dev
+              ];
 
-            postPatch = relativePathSubstitution;
-          };
+              postPatch = relativePathSubstitution;
+            }
+          ) { };
 
           default = pkgs.symlinkJoin {
             name = "3dxdisp";
             paths = [
               self.packages.${system}.driver
               self.packages.${system}.example
+              self.packages.${system}.spacepilotDisplay
             ];
           };
+        };
+        apps = {
+          example = {
+            type = "app";
+            program = "${self.packages.${system}.example}/bin/draw3dxdisplogo";
+          };
+          jamlytics =
+            let
+              spacepilotDisplayWithAssets = self.packages.${system}.spacepilotDisplay.override {
+                jamlytics = true;
+              };
+            in
+            {
+              type = "app";
+              program = "${pkgs.writeShellScript "draw-jamlytics-logo-to-spacepilot" ''${spacepilotDisplayWithAssets}/bin/spacepilotdisplay ${spacepilotDisplayWithAssets}/share/jamlytics.packed''}";
+            };
+          default = self.apps.${system}.example;
         };
       }
     );
