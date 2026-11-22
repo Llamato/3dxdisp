@@ -77,17 +77,35 @@
           buildInputs = [
             self.driver
             self.libimago
-            pkgs.udev.dev
+            pkgs.udev
           ];
 
           postPatch = relativePathSubstitution;
 
           installPhase = ''
             runHook preInstall
-            mkdir -p $out
-            cp 3dximage $out
+            mkdir -p $out/bin
+            cp 3dximage $out/bin
             runHook postInstall
           '';
+        };
+
+        spacepilotDisplay = pkgs.stdenv.mkDerivation {
+          pname ="spacepilotdisplay";
+          version = "1.0.0";
+          src = ./spacepilotdisplay;
+
+          makeFlags = [ 
+            "PREFIX=$(out)"
+            "DESTDIR="
+          ];
+
+          buildInputs = [
+            self.driver
+            pkgs.udev.dev
+          ];
+
+          postPatch = relativePathSubstitution;
         };
 
         default = pkgs.symlinkJoin {
