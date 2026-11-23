@@ -27,6 +27,12 @@
           substituteInPlace Makefile \
             --replace-fail "../lib3dxdisp.a" "${self.packages.${system}.driver}/lib/lib3dxdisp.a"
         '';
+        spacepilotDisplayMeta = {
+          description = "A program for dumping a 1 bit monochrome image to a 3dconnexion spacepilot display";
+          license = lib.licenses.agpl3Only;
+          platforms = lib.platforms.linux;
+          mainProgram = "spacepilotdisplay";
+        };
       in
       {
         packages = {
@@ -81,6 +87,12 @@
                 libjpeg
                 libpng
               ];
+
+              meta = {
+                description = "An image manipulation library";
+                license = lib.licenses.mit;
+                platforms = lib.platforms.linux;
+              };
             };
 
           threedximage = pkgs.stdenv.mkDerivation {
@@ -102,6 +114,13 @@
               cp 3dximage $out/bin
               runHook postInstall
             '';
+
+            meta = {
+              description = "An program for displaying arbitery images on a 3dconnexion spacepilot display";
+              license = lib.licenses.mit;
+              platforms = lib.platforms.linux;
+              mainProgram = "3dximage";
+            };
           };
 
           spacepilotDisplay = lib.makeOverridable (
@@ -124,6 +143,8 @@
               ];
 
               postPatch = relativePathSubstitution;
+
+              meta = spacepilotDisplayMeta;
             }
           ) { };
 
@@ -153,6 +174,7 @@
             {
               type = "app";
               program = "${pkgs.writeShellScript "draw-jamlytics-logo-to-spacepilot" ''${spacepilotDisplayWithAssets}/bin/spacepilotdisplay ${spacepilotDisplayWithAssets}/share/jamlytics.packed''}";
+              meta = spacepilotDisplayMeta;
             };
           default = self.apps.${system}.example;
         };
