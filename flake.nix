@@ -148,8 +148,14 @@
             }
           ) { };
 
+          spacepilotDisplayJamlytics = self.packages.${system}.spacepilotDisplay.override {
+            jamlytics = true;
+          };
+
           default = pkgs.lib.makeOverridable (
-            { jamlytics ? false }:
+            {
+              jamlytics ? false,
+            }:
             pkgs.symlinkJoin {
               name = "3dxdisp";
               paths = [
@@ -158,7 +164,7 @@
                 (self.packages.${system}.spacepilotDisplay.override { inherit jamlytics; })
               ];
             }
-          ) {};
+          ) { };
         };
         apps = {
           example = {
@@ -173,7 +179,7 @@
             in
             {
               type = "app";
-              program = "${pkgs.writeShellScript "draw-jamlytics-logo-to-spacepilot" ''${spacepilotDisplayWithAssets}/bin/spacepilotdisplay ${spacepilotDisplayWithAssets}/share/jamlytics.packed''}";
+              program = "${pkgs.writeShellScript "draw-jamlytics-logo-to-spacepilot" "${spacepilotDisplayWithAssets}/bin/spacepilotdisplay ${spacepilotDisplayWithAssets}/share/jamlytics.packed"}";
               meta = spacepilotDisplayMeta;
             };
           default = self.apps.${system}.example;
