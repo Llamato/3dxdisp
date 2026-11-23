@@ -148,7 +148,7 @@
             }
           ) { };
 
-          spacepilotDisplayJamlytics = self.packages.${system}.spacepilotDisplay.override {
+          jamlytics = self.packages.${system}.spacepilotDisplay.override {
             jamlytics = true;
           };
 
